@@ -32,14 +32,17 @@ def login(response: Response,
         raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED,
                             detail="Incorrect email or password")
 
+    payload = {
+        "id": result.id,
+        "email": result.email,
+        "name": result.name,
+        "role": result.role.value,
+    }
+
     token = jwt_service.create_access_token(
         subject=result.id,
-        payload={
-            "id": result.id,
-            "email": result.email,
-            "username": result.username,
-            "is_admin": result.is_admin,
-        }
+        payload=payload
     )
     response.set_cookie(key="Authorization", value=f"{token}", httponly=True)
-    return ApiResponse(status=HTTPStatus.OK, data={"token": token})
+    response.set_cookie(key="AuthUser", value=f"{payload}", httponly=True)
+    return ApiResponse(status=HTTPStatus.OK, data={"token": token, "payload": payload})

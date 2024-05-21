@@ -4,7 +4,7 @@ from fastapi import Depends, HTTPException
 from typing import Optional
 
 from need.repository import NeedRepository, get_need_repository
-from need.schema import NeedCreate, NeedUpdate, NeedRead, NeedPage
+from need.schema import NeedCreate, NeedUpdate, NeedRead, NeedPage, NeedList
 from util.decorators import with_error_logger
 
 
@@ -32,6 +32,11 @@ class NeedService:
         db_page = self.need_repository.fetch(
             page_size, page, search_query, sort_by, sort_direction)
         return NeedPage.from_orm(db_page)
+
+    @with_error_logger
+    def get_by_user_id(self, user_id: int):
+        db_needs = self.need_repository.get_by_user_id(user_id=user_id)
+        return NeedList.from_orm({'items': db_needs})
 
     @with_error_logger
     def create(self, entity: NeedCreate):

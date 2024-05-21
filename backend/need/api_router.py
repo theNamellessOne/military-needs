@@ -1,6 +1,6 @@
 from http import HTTPStatus
 from fastapi import APIRouter, Depends, Query, HTTPException
-from need.schema import NeedCreate, NeedUpdate
+from need.schema import NeedUpdate, NeedCreateRequest, NeedCreate
 from need.service import NeedService, get_need_service
 from common.schema import ApiResponse
 from user.model import Role
@@ -33,14 +33,27 @@ def get_by_id(need_id: int,
     return ApiResponse(status=HTTPStatus.OK, data=data)
 
 
+@router.get("/by/{user_id}", response_model=ApiResponse)
+@with_api_exception_handling
+def get_by_user_id(user_id: int,
+                   need_service: NeedService = Depends(get_need_service),
+                   _=Depends(with_auth())):
+    data = need_service.get_by_user_id(user_id)
+    return ApiResponse(status=HTTPStatus.OK, data=data)
+
+
 @router.post("/", response_model=ApiResponse)
 @with_api_exception_handling
-def create(entity: NeedCreate,
+def create(entity: NeedCreateRequest,
            need_service: NeedService = Depends(get_need_service),
            principal=Depends(with_auth(Role.SOLDIER))):
-    entity.user_id = principal['id']
+    data = NeedCreate(
+        user_id=principal['id'],
+        name=entity.name,
+        description=entity.description
+    )
     return ApiResponse(status=HTTPStatus.CREATED,
-                       data=need_service.create(entity))
+                       data=need_service.create(data))
 
 
 @router.put("/{need_id}", response_model=ApiResponse)

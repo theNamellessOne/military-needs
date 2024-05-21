@@ -7,12 +7,12 @@ class UserRead(OrmBase):
     id: int
     role: Role
     contact_info: str
+    name: str
     email: EmailStr
 
 
 class UserBase(BaseModel):
     email: EmailStr
-    contact_info: str
     password: str
 
 
@@ -22,6 +22,8 @@ class UserLogin(UserBase):
 
 class UserRegister(UserBase):
     role: Role
+    contact_info: str
+    name: str
 
 
 class UserUpdate(UserRegister):

@@ -36,11 +36,6 @@ class JwtService:
 
         return encoded_jwt
 
-    @with_error_logger
-    def validate_token(self, token: str) -> bool:
-        payload = self._get_token_payload(token)
-        return payload is not None
-
 
 def get_jwt_service():
     return JwtService()

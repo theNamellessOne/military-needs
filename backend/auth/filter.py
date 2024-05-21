@@ -12,7 +12,7 @@ def with_auth(role: Role = None):
             raise HTTPException(status_code=HTTPStatus.FORBIDDEN,
                                 detail="Not authenticated")
 
-        if role and current_user['role'] != role:
+        if role and current_user['role'] != role.value:
             raise HTTPException(status_code=HTTPStatus.FORBIDDEN,
                                 detail="Not enought priviliges")
 

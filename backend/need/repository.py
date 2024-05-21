@@ -20,6 +20,9 @@ class NeedRepository:
                 .outerjoin(User, User.id == Need.user_id)
                 .first())
 
+    def get_by_user_id(self, user_id: int):
+        return self.session.query(Need).filter(Need.user_id == user_id).all()
+
     def fetch(self,
               page_size: int,
               page: int,
@@ -56,7 +59,7 @@ class NeedRepository:
         self.session.commit()
         self.session.refresh(db_need)
 
-        return db_need
+        return self.get_by_id(need_id)
 
     def delete(self, item_id: int):
         db_need = self.get_by_id(item_id)

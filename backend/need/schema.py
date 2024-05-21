@@ -16,10 +16,17 @@ class NeedRead(NeedBase, TimestampMixin):
     user: UserRead
 
 
-class NeedPage(OrmBase):
+class NeedList(OrmBase):
     items: List[NeedRead]
+
+
+class NeedPage(NeedList):
     current_page: int
     total_pages: int
+
+
+class NeedCreateRequest(NeedBase):
+    pass
 
 
 class NeedCreate(NeedBase):

@@ -1,9 +1,8 @@
 from http import HTTPStatus
-from fastapi import APIRouter, Depends, Query
-from user.schema import UserCreate, UserUpdate
+from fastapi import APIRouter, Depends, Query, HTTPException
+from user.schema import UserUpdate
 from user.service import UserService, get_user_service
 from common.schema import ApiResponse
-from user.model import Role
 from util.decorators import with_api_exception_handling
 from auth.filter import with_auth
 
@@ -33,20 +32,16 @@ def get_by_id(user_id: int,
     return ApiResponse(status=HTTPStatus.OK, data=data)
 
 
-@router.post("/", response_model=ApiResponse)
-@with_api_exception_handling
-def create(entity: UserCreate,
-           user_service: UserService = Depends(get_user_service),
-           _=Depends(with_auth(Role.SOLDIER))):
-    return ApiResponse(status=HTTPStatus.CREATED, data=user_service.create(entity))
-
-
 @router.put("/{user_id}", response_model=ApiResponse)
 @with_api_exception_handling
 def replace(user_id: int,
             entity: UserUpdate,
             user_service: UserService = Depends(get_user_service),
-            _=Depends(with_auth(Role.SOLDIER))):
+            principal=Depends(with_auth())):
+    if principal['id'] != user_id:
+        raise HTTPException(status_code=HTTPStatus.FORBIDDEN,
+                            detail="Not enought priviliges")
+
     return ApiResponse(status=HTTPStatus.OK, data=user_service.replacement_update(user_id, entity))
 
 
@@ -55,13 +50,9 @@ def replace(user_id: int,
 def patch(user_id: int,
           entity: UserUpdate,
           user_service: UserService = Depends(get_user_service),
-          _=Depends(with_auth(Role.SOLDIER))):
+          principal=Depends(with_auth())):
+    if principal['id'] != user_id:
+        raise HTTPException(status_code=HTTPStatus.FORBIDDEN,
+                            detail="Not enought priviliges")
+
     return ApiResponse(status=HTTPStatus.OK, data=user_service.patch_update(user_id, entity))
-
-
-@router.delete("/{user_id}", response_model=ApiResponse)
-@with_api_exception_handling
-def delete(user_id: int,
-           user_service: UserService = Depends(get_user_service),
-           _=Depends(with_auth(Role.SOLDIER))):
-    return ApiResponse(status=HTTPStatus.OK, data=user_service.delete(user_id))

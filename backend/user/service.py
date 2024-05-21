@@ -42,7 +42,13 @@ class UserService:
     def replacement_update(self,
                            user_id: int,
                            user_update: UserUpdate):
-        self.check_exists(user_update.email)
+        db_user = self.user_repository.get_by_email(user_update.email)
+
+        if (user_update.email != db_user.email):
+            self.check_exists(user_update.email)
+
+        user_update.password = self.password_service.get_hash_password(
+            user_update.password)
         db_user = self.user_repository.update(user_id, user_update)
 
         if db_user is None:
